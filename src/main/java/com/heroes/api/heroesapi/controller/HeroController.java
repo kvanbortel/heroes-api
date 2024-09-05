@@ -106,9 +106,14 @@ public class HeroController {
     @GetMapping("/")
     public ResponseEntity<Hero[]> searchHeroes(@RequestParam String name) {
         LOG.info("GET /heroes/?name="+name);
-
-        // Replace below with your implementation
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            Hero[] heroes = heroDao.findHeroes(name);
+            return new ResponseEntity<Hero[]>(heroes,HttpStatus.OK);
+        }
+        catch (IOException e) {
+            LOG.log(Level.SEVERE,e.getLocalizedMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
