@@ -46,14 +46,14 @@ public class HeroController {
     }
 
     /**
-     * Helper function to check if a hero already exists by name
+     * Helper function to check if a hero already exists by id
      * 
      * @param hero - The {@link Hero hero} to check
      * @return true if hero already exists, false otherwise or if there is an error
      */
     public Boolean heroExists(Hero hero) {
         try {
-            return (heroDao.findHeroes(hero.getName()).length != 0);
+            return (heroDao.getHero(hero.getId()) != null);
         }
         catch(IOException e) {
             LOG.log(Level.SEVERE,e.getLocalizedMessage());
@@ -171,9 +171,19 @@ public class HeroController {
     @PutMapping("")
     public ResponseEntity<Hero> updateHero(@RequestBody Hero hero) {
         LOG.info("PUT /heroes " + hero);
-
-        // Replace below with your implementation
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            if (!heroExists(hero)) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            else {
+                Hero updatedHero = heroDao.updateHero(hero);
+                return new ResponseEntity<Hero>(updatedHero,HttpStatus.OK);
+            }
+        }
+        catch (IOException e) {
+            LOG.log(Level.SEVERE,e.getLocalizedMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
