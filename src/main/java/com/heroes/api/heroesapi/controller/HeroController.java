@@ -46,22 +46,6 @@ public class HeroController {
     }
 
     /**
-     * Helper function to check if a hero already exists by id
-     * 
-     * @param hero - The {@link Hero hero} to check
-     * @return true if hero already exists, false otherwise or if there is an error
-     */
-    public Boolean heroExists(Hero hero) {
-        try {
-            return (heroDao.getHero(hero.getId()) != null);
-        }
-        catch(IOException e) {
-            LOG.log(Level.SEVERE,e.getLocalizedMessage());
-            return false;
-        }
-    }
-
-    /**
      * Responds to the GET request for a {@linkplain Hero hero} for the given id
      * 
      * @param id The id used to locate the {@link Hero hero}
@@ -145,7 +129,7 @@ public class HeroController {
     public ResponseEntity<Hero> createHero(@RequestBody Hero hero) {
         LOG.info("POST /heroes " + hero);
         try {
-            if (heroExists(hero)) {
+            if (heroDao.getHero(hero.getId()) != null) {
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
             }
             else {
@@ -172,13 +156,11 @@ public class HeroController {
     public ResponseEntity<Hero> updateHero(@RequestBody Hero hero) {
         LOG.info("PUT /heroes " + hero);
         try {
-            if (!heroExists(hero)) {
+            Hero updatedHero = heroDao.updateHero(hero);
+            if (updatedHero == null)
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-            else {
-                Hero updatedHero = heroDao.updateHero(hero);
+            else
                 return new ResponseEntity<Hero>(updatedHero,HttpStatus.OK);
-            }
         }
         catch (IOException e) {
             LOG.log(Level.SEVERE,e.getLocalizedMessage());
@@ -198,8 +180,15 @@ public class HeroController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Hero> deleteHero(@PathVariable int id) {
         LOG.info("DELETE /heroes/" + id);
-
-        // Replace below with your implementation
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            if (heroDao.deleteHero(id))
+                return new ResponseEntity<Hero>(HttpStatus.OK);
+            else
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        catch (IOException e) {
+            LOG.log(Level.SEVERE,e.getLocalizedMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
