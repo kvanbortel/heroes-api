@@ -80,9 +80,14 @@ public class HeroController {
     @GetMapping("")
     public ResponseEntity<Hero[]> getHeroes() {
         LOG.info("GET /heroes");
-
-        // Replace below with your implementation
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            Hero[] heroes = heroDao.getHeroes();
+            return new ResponseEntity<Hero[]>(heroes,HttpStatus.OK);
+        }
+        catch (IOException e) {
+            LOG.log(Level.SEVERE,e.getLocalizedMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
