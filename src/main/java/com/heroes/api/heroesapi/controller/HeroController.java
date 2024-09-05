@@ -46,6 +46,22 @@ public class HeroController {
     }
 
     /**
+     * Helper function to check if a hero already exists by name
+     * 
+     * @param hero - The {@link Hero hero} to check
+     * @return true if hero already exists, false otherwise or if there is an error
+     */
+    public Boolean heroExists(Hero hero) {
+        try {
+            return (heroDao.findHeroes(hero.getName()).length != 0);
+        }
+        catch(IOException e) {
+            LOG.log(Level.SEVERE,e.getLocalizedMessage());
+            return false;
+        }
+    }
+
+    /**
      * Responds to the GET request for a {@linkplain Hero hero} for the given id
      * 
      * @param id The id used to locate the {@link Hero hero}
@@ -128,9 +144,19 @@ public class HeroController {
     @PostMapping("")
     public ResponseEntity<Hero> createHero(@RequestBody Hero hero) {
         LOG.info("POST /heroes " + hero);
-
-        // Replace below with your implementation
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            if (heroExists(hero)) {
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+            else {
+                Hero newHero = heroDao.createHero(hero);
+                return new ResponseEntity<Hero>(newHero,HttpStatus.CREATED);
+            }
+        }
+        catch (IOException e) {
+            LOG.log(Level.SEVERE,e.getLocalizedMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
