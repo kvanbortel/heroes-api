@@ -129,7 +129,8 @@ public class HeroController {
     public ResponseEntity<Hero> createHero(@RequestBody Hero hero) {
         LOG.info("POST /heroes " + hero);
         try {
-            if (heroDao.getHero(hero.getId()) != null) {
+            // If id and name already exist as an object, there is a conflict
+            if (heroDao.getHero(hero.getId()) != null && heroDao.findHeroes(hero.getName()).length != 0) {
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
             }
             else {
