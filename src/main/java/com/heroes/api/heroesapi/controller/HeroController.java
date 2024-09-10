@@ -59,10 +59,10 @@ public class HeroController {
         LOG.info("GET /heroes/" + id);
         try {
             Hero hero = heroDao.getHero(id);
-            if (hero != null)
-                return new ResponseEntity<Hero>(hero,HttpStatus.OK);
-            else
+            if (hero == null)
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            else
+                return new ResponseEntity<Hero>(hero,HttpStatus.OK);
         }
         catch(IOException e) {
             LOG.log(Level.SEVERE,e.getLocalizedMessage());
@@ -129,14 +129,11 @@ public class HeroController {
     public ResponseEntity<Hero> createHero(@RequestBody Hero hero) {
         LOG.info("POST /heroes " + hero);
         try {
-            // If id and name already exist as an object, there is a conflict
-            if (heroDao.getHero(hero.getId()) != null && heroDao.findHeroes(hero.getName()).length != 0) {
+            Hero newHero = heroDao.createHero(hero);
+            if (newHero == null)
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
-            }
-            else {
-                Hero newHero = heroDao.createHero(hero);
+            else
                 return new ResponseEntity<Hero>(newHero,HttpStatus.CREATED);
-            }
         }
         catch (IOException e) {
             LOG.log(Level.SEVERE,e.getLocalizedMessage());
