@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HeroController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">heroes-api</a> &gt; <a href="index.source.html" class="el_package">com.heroes.api.heroesapi.controller</a> &gt; <span class="el_source">HeroController.java</span></div><h1>HeroController.java</h1><pre class="source lang-java linenums">package com.heroes.api.heroesapi.controller;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.heroes.api.heroesapi.persistence.HeroDAO;
+import com.heroes.api.heroesapi.model.Hero;
+
+/**
+ * Handles the REST API requests for the Hero resource
+ * &lt;p&gt;
+ * {@literal @}RestController Spring annotation identifies this class as a REST API
+ * method handler to the Spring framework
+ * 
+ * @author SWEN Faculty
+ */
+
+@RestController
+@RequestMapping(&quot;heroes&quot;)
+public class HeroController {
+<span class="fc" id="L34">    private static final Logger LOG = Logger.getLogger(HeroController.class.getName());</span>
+    private HeroDAO heroDao;
+
+    /**
+     * Creates a REST API controller to reponds to requests
+     * 
+     * @param heroDao The {@link HeroDAO Hero Data Access Object} to perform CRUD operations
+     * &lt;br&gt;
+     * This dependency is injected by the Spring Framework
+     */
+<span class="fc" id="L44">    public HeroController(HeroDAO heroDao) {</span>
+<span class="fc" id="L45">        this.heroDao = heroDao;</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * Responds to the GET request for a {@linkplain Hero hero} for the given id
+     * 
+     * @param id The id used to locate the {@link Hero hero}
+     * 
+     * @return ResponseEntity with {@link Hero hero} object and HTTP status of OK if found&lt;br&gt;
+     * ResponseEntity with HTTP status of NOT_FOUND if not found&lt;br&gt;
+     * ResponseEntity with HTTP status of INTERNAL_SERVER_ERROR otherwise
+     */
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Hero&gt; getHero(@PathVariable int id) {
+<span class="fc" id="L59">        LOG.info(&quot;GET /heroes/&quot; + id);</span>
+        try {
+<span class="fc" id="L61">            Hero hero = heroDao.getHero(id);</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">            if (hero == null)</span>
+<span class="fc" id="L63">                return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</span>
+            else
+<span class="fc" id="L65">                return new ResponseEntity&lt;Hero&gt;(hero,HttpStatus.OK);</span>
+        }
+<span class="fc" id="L67">        catch(IOException e) {</span>
+<span class="fc" id="L68">            LOG.log(Level.SEVERE,e.getLocalizedMessage());</span>
+<span class="fc" id="L69">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+        }
+    }
+
+    /**
+     * Responds to the GET request for all {@linkplain Hero heroes}
+     * 
+     * @return ResponseEntity with array of {@link Hero hero} objects (may be empty) and
+     * HTTP status of OK&lt;br&gt;
+     * ResponseEntity with HTTP status of INTERNAL_SERVER_ERROR otherwise
+     */
+    @GetMapping(&quot;&quot;)
+    public ResponseEntity&lt;Hero[]&gt; getHeroes() {
+<span class="fc" id="L82">        LOG.info(&quot;GET /heroes&quot;);</span>
+        try {
+<span class="fc" id="L84">            Hero[] heroes = heroDao.getHeroes();</span>
+<span class="fc" id="L85">            return new ResponseEntity&lt;Hero[]&gt;(heroes,HttpStatus.OK);</span>
+        }
+<span class="fc" id="L87">        catch (IOException e) {</span>
+<span class="fc" id="L88">            LOG.log(Level.SEVERE,e.getLocalizedMessage());</span>
+<span class="fc" id="L89">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+        }
+    }
+
+    /**
+     * Responds to the GET request for all {@linkplain Hero heroes} whose name contains
+     * the text in name
+     * 
+     * @param name The name parameter which contains the text used to find the {@link Hero heroes}
+     * 
+     * @return ResponseEntity with array of {@link Hero hero} objects (may be empty) and
+     * HTTP status of OK&lt;br&gt;
+     * ResponseEntity with HTTP status of INTERNAL_SERVER_ERROR otherwise
+     * &lt;p&gt;
+     * Example: Find all heroes that contain the text &quot;ma&quot;
+     * GET http://localhost:8080/heroes/?name=ma
+     */
+    @GetMapping(&quot;/&quot;)
+    public ResponseEntity&lt;Hero[]&gt; searchHeroes(@RequestParam String name) {
+<span class="fc" id="L108">        LOG.info(&quot;GET /heroes/?name=&quot;+name);</span>
+        try {
+<span class="fc" id="L110">            Hero[] heroes = heroDao.findHeroes(name);</span>
+<span class="fc" id="L111">            return new ResponseEntity&lt;Hero[]&gt;(heroes,HttpStatus.OK);</span>
+        }
+<span class="fc" id="L113">        catch (IOException e) {</span>
+<span class="fc" id="L114">            LOG.log(Level.SEVERE,e.getLocalizedMessage());</span>
+<span class="fc" id="L115">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+        }
+    }
+
+    /**
+     * Creates a {@linkplain Hero hero} with the provided hero object
+     * 
+     * @param hero - The {@link Hero hero} to create
+     * 
+     * @return ResponseEntity with created {@link Hero hero} object and HTTP status of CREATED&lt;br&gt;
+     * ResponseEntity with HTTP status of CONFLICT if {@link Hero hero} object already exists&lt;br&gt;
+     * ResponseEntity with HTTP status of INTERNAL_SERVER_ERROR otherwise
+     */
+    @PostMapping(&quot;&quot;)
+    public ResponseEntity&lt;Hero&gt; createHero(@RequestBody Hero hero) {
+<span class="fc" id="L130">        LOG.info(&quot;POST /heroes &quot; + hero);</span>
+        try {
+<span class="fc" id="L132">            Hero newHero = heroDao.createHero(hero);</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">            if (newHero == null)</span>
+<span class="fc" id="L134">                return new ResponseEntity&lt;&gt;(HttpStatus.CONFLICT);</span>
+            else
+<span class="fc" id="L136">                return new ResponseEntity&lt;Hero&gt;(newHero,HttpStatus.CREATED);</span>
+        }
+<span class="fc" id="L138">        catch (IOException e) {</span>
+<span class="fc" id="L139">            LOG.log(Level.SEVERE,e.getLocalizedMessage());</span>
+<span class="fc" id="L140">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+        }
+    }
+
+    /**
+     * Updates the {@linkplain Hero hero} with the provided {@linkplain Hero hero} object, if it exists
+     * 
+     * @param hero The {@link Hero hero} to update
+     * 
+     * @return ResponseEntity with updated {@link Hero hero} object and HTTP status of OK if updated&lt;br&gt;
+     * ResponseEntity with HTTP status of NOT_FOUND if not found&lt;br&gt;
+     * ResponseEntity with HTTP status of INTERNAL_SERVER_ERROR otherwise
+     */
+    @PutMapping(&quot;&quot;)
+    public ResponseEntity&lt;Hero&gt; updateHero(@RequestBody Hero hero) {
+<span class="fc" id="L155">        LOG.info(&quot;PUT /heroes &quot; + hero);</span>
+        try {
+<span class="fc" id="L157">            Hero updatedHero = heroDao.updateHero(hero);</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">            if (updatedHero == null)</span>
+<span class="fc" id="L159">                return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</span>
+            else
+<span class="fc" id="L161">                return new ResponseEntity&lt;Hero&gt;(updatedHero,HttpStatus.OK);</span>
+        }
+<span class="fc" id="L163">        catch (IOException e) {</span>
+<span class="fc" id="L164">            LOG.log(Level.SEVERE,e.getLocalizedMessage());</span>
+<span class="fc" id="L165">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+        }
+    }
+
+    /**
+     * Deletes a {@linkplain Hero hero} with the given id
+     * 
+     * @param id The id of the {@link Hero hero} to deleted
+     * 
+     * @return ResponseEntity HTTP status of OK if deleted&lt;br&gt;
+     * ResponseEntity with HTTP status of NOT_FOUND if not found&lt;br&gt;
+     * ResponseEntity with HTTP status of INTERNAL_SERVER_ERROR otherwise
+     */
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Hero&gt; deleteHero(@PathVariable int id) {
+<span class="fc" id="L180">        LOG.info(&quot;DELETE /heroes/&quot; + id);</span>
+        try {
+<span class="fc bfc" id="L182" title="All 2 branches covered.">            if (heroDao.deleteHero(id))</span>
+<span class="fc" id="L183">                return new ResponseEntity&lt;Hero&gt;(HttpStatus.OK);</span>
+            else
+<span class="fc" id="L185">                return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</span>
+        }
+<span class="fc" id="L187">        catch (IOException e) {</span>
+<span class="fc" id="L188">            LOG.log(Level.SEVERE,e.getLocalizedMessage());</span>
+<span class="fc" id="L189">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
