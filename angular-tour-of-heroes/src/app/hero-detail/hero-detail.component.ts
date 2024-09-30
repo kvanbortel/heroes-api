@@ -14,13 +14,13 @@ import { HeroService } from '../hero.service';
   imports: [FormsModule, NgIf, UpperCasePipe]
 })
 export class HeroDetailComponent {
+  hero: Hero | undefined;
+
   constructor(
     private route: ActivatedRoute,
     private heroService: HeroService,
     private location: Location
   ) {}
-  
-  @Input() hero?: Hero;
 
   ngOnInit(): void {
     this.getHero();
@@ -34,5 +34,12 @@ export class HeroDetailComponent {
 
   goBack(): void {
     this.location.back();
+  }
+
+  save(): void {
+    if (this.hero) {
+      this.heroService.updateHero(this.hero)
+        .subscribe(() => this.goBack());
+    }
   }
 }
